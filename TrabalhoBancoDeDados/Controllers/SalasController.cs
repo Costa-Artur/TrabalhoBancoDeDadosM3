@@ -88,5 +88,68 @@ namespace TrabalhoBancoDeDados.api.Controllers
             var universidadeToReturn = await _univaliRepository.GetUniversidadeByIdAsync(universidade.Id);
             return Ok(universidadeToReturn);
         }
+
+        [HttpGet("salas")]
+        public async Task<ActionResult<Sala>> GetSalas () {
+            var salasFromDatabase = await _univaliRepository.GetSalasAsync();
+
+            if(salasFromDatabase == null) {
+                return NotFound();
+            }
+
+            return Ok(salasFromDatabase);
+        }   
+
+        [HttpGet("salas/{salaId}")]
+        public async Task<ActionResult<Sala>> GetSalaById (int salaId) {
+            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(salaId);
+
+            if(salaFromDatabase == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(salaFromDatabase);
+        }
+
+        [HttpPost("salas")]
+        public async Task<ActionResult<Sala>> CreateSala (Sala sala) 
+        {
+            _univaliRepository.AddSala(sala);
+            await _univaliRepository.SaveChangesAsync();
+            var salaToReturn = await _univaliRepository.GetSalaByIdAsync(sala.Id);
+            return Ok(salaToReturn);
+        }
+
+        [HttpPut("salas")]
+        public async Task<ActionResult<Sala>> UpdateSala (Sala sala)
+        {
+            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(sala.Id);
+            if(salaFromDatabase == null) {
+                return NotFound();
+            }
+
+            _mapper.Map(sala, salaFromDatabase);
+
+            await _univaliRepository.SaveChangesAsync();
+
+            var salaToReturn = await _univaliRepository.GetSalaByIdAsync(sala.Id);
+            return Ok(salaToReturn);
+        }
+
+        [HttpDelete("salas/{salaId}")]
+        public async Task<ActionResult> DeleteSala (int salaId)
+        {
+            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(salaId);
+
+            if(salaFromDatabase == null)
+            {
+                return NotFound();
+            }
+            _univaliRepository.DeleteSala(salaFromDatabase);
+            await _univaliRepository.SaveChangesAsync();
+
+            return NoContent();
+        }
     }
 }

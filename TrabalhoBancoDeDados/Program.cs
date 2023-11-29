@@ -10,7 +10,7 @@ builder.Services.AddScoped<IUnivaliRepository, UnivaliRepository>();
 builder.Services.AddDbContext<UnivaliContext>(options =>
 {
     options
-    .UseNpgsql("Host=localhost;Port=5432;Database=TrabalhoBD;Username=postgres;Password=pass123;Include Error Detail=true");
+    .UseNpgsql("Host=localhost;Port=5432;Database=TrabalhoBD;Username=postgres;Password=123456;Include Error Detail=true");
 }
 );
 
