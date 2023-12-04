@@ -11,12 +11,12 @@ namespace TrabalhoBancoDeDados.api.Repositories
         void DeleteUniversidade(Universidade universidade);
 
         Task<IEnumerable<Bloco>> GetBlocosWithSalasAsync();
-        Task<Bloco?> GetBlocoByIdAsync(int blocoId);
+        Task<Bloco?> GetBlocoByIdAsync(int blocoId, int universidadeId);
         void AddBloco(Bloco bloco);
         void DeleteBloco(Bloco bloco);
 
         Task<IEnumerable<Sala>> GetSalasAsync();
-        Task<Sala?> GetSalaByIdAsync(int salaId);
+        Task<Sala?> GetSalaByIdAsync(int salaId, int blocoId);
         void AddSala(Sala sala);
         void DeleteSala(Sala sala);
 

@@ -24,11 +24,6 @@ namespace TrabalhoBancoDeDados.api.Controllers
         {
             var universidadesFromDatabase = await _univaliRepository.GetUniversidadesWithBlocosAsync();
 
-            if(universidadesFromDatabase == null)
-            {
-                return NotFound();
-            }
-
             return Ok(universidadesFromDatabase.ToList());
         }
 
@@ -36,11 +31,6 @@ namespace TrabalhoBancoDeDados.api.Controllers
         public async Task<ActionResult<IEnumerable<Universidade>>> GetUniversidadeById(int universidadeId)
         {
             var universidadeFromDatabase = await _univaliRepository.GetUniversidadeByIdAsync(universidadeId);
-
-            if (universidadeFromDatabase == null)
-            {
-                return NotFound();
-            }
 
             return Ok(universidadeFromDatabase);
         }
@@ -90,24 +80,15 @@ namespace TrabalhoBancoDeDados.api.Controllers
         }
 
         [HttpGet("salas")]
-        public async Task<ActionResult<Sala>> GetSalas () {
+        public async Task<ActionResult<IEnumerable<Sala>>> GetSalas () {
             var salasFromDatabase = await _univaliRepository.GetSalasAsync();
-
-            if(salasFromDatabase == null) {
-                return NotFound();
-            }
 
             return Ok(salasFromDatabase);
         }   
 
-        [HttpGet("salas/{salaId}")]
-        public async Task<ActionResult<Sala>> GetSalaById (int salaId) {
-            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(salaId);
-
-            if(salaFromDatabase == null)
-            {
-                return NotFound();
-            }
+        [HttpGet("salas/{salaId}/{blocoId}")]
+        public async Task<ActionResult<Sala>> GetSalaById (int salaId, int blocoId) {
+            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(salaId, blocoId);
 
             return Ok(salaFromDatabase);
         }
@@ -117,36 +98,92 @@ namespace TrabalhoBancoDeDados.api.Controllers
         {
             _univaliRepository.AddSala(sala);
             await _univaliRepository.SaveChangesAsync();
-            var salaToReturn = await _univaliRepository.GetSalaByIdAsync(sala.Id);
+            var salaToReturn = await _univaliRepository.GetSalaByIdAsync(sala.Id, sala.BlocoId);
             return Ok(salaToReturn);
         }
 
         [HttpPut("salas")]
         public async Task<ActionResult<Sala>> UpdateSala (Sala sala)
         {
-            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(sala.Id);
+            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(sala.Id, sala.BlocoId);
             if(salaFromDatabase == null) {
-                return NotFound();
+                return BadRequest();
             }
 
             _mapper.Map(sala, salaFromDatabase);
 
             await _univaliRepository.SaveChangesAsync();
 
-            var salaToReturn = await _univaliRepository.GetSalaByIdAsync(sala.Id);
+            var salaToReturn = await _univaliRepository.GetSalaByIdAsync(sala.Id, sala.BlocoId) ;
             return Ok(salaToReturn);
         }
 
-        [HttpDelete("salas/{salaId}")]
-        public async Task<ActionResult> DeleteSala (int salaId)
+        [HttpDelete("salas/{blocoId}/{salaId}")]
+        public async Task<ActionResult> DeleteSala (int blocoId, int salaId )
         {
-            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(salaId);
+            var salaFromDatabase = await _univaliRepository.GetSalaByIdAsync(salaId, blocoId);
 
             if(salaFromDatabase == null)
             {
                 return NotFound();
             }
             _univaliRepository.DeleteSala(salaFromDatabase);
+            await _univaliRepository.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpGet("blocos")]
+        public async Task<ActionResult<IEnumerable<Bloco>>> GetBlocos()
+        {
+            var blocosFromDatabase = await _univaliRepository.GetBlocosWithSalasAsync();
+
+            return Ok(blocosFromDatabase);
+        }
+
+        [HttpGet("blocos/{universidadeId}/{blocoId}")]
+        public async Task<ActionResult<Bloco>> GetBlocoById(int universidadeId, int blocoId)
+        {
+            var blocoFromDatabase = await _univaliRepository.GetBlocoByIdAsync(blocoId, universidadeId);
+
+            return Ok(blocoFromDatabase);
+        }
+
+        [HttpPost("blocos")]
+        public async Task<ActionResult<Bloco>> CreateBloco(Bloco bloco)
+        {
+            _univaliRepository.AddBloco(bloco);
+            await _univaliRepository.SaveChangesAsync();
+            var blocoFromDatabase = _univaliRepository.GetBlocoByIdAsync(bloco.Id, bloco.UniversidadeId);
+            return Ok(blocoFromDatabase);
+        }
+
+        [HttpPut("blocos")]
+        public async Task<ActionResult<Bloco>> UpdateBloco (Bloco bloco)
+        {
+            var blocoFromDatabase = await _univaliRepository.GetBlocoByIdAsync(bloco.Id, bloco.UniversidadeId);
+            if(blocoFromDatabase == null)
+            {
+                return BadRequest();
+            }
+
+            _mapper.Map(bloco, blocoFromDatabase);
+            await _univaliRepository.SaveChangesAsync();
+            
+            var blocoToReturn = await _univaliRepository.GetBlocoByIdAsync(bloco.Id, bloco.UniversidadeId);
+            return Ok(blocoToReturn);
+        }
+
+        [HttpDelete("blocos/{universidadeId}/{blocoId}")]
+        public async Task<ActionResult> DeleteBloco (int universidadeId, int blocoId)
+        {
+            var blocoFromDatabase = await _univaliRepository.GetBlocoByIdAsync(blocoId, universidadeId);
+            if(blocoFromDatabase == null)
+            {
+                return BadRequest();
+            }
+
+            _univaliRepository.DeleteBloco(blocoFromDatabase);
             await _univaliRepository.SaveChangesAsync();
 
             return NoContent();

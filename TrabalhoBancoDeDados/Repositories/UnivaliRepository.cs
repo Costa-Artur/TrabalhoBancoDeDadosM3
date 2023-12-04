@@ -47,9 +47,9 @@ namespace TrabalhoBancoDeDados.api.Repositories
             _context.Universidades.Remove(universidade);
         }
 
-        public async Task<Bloco?> GetBlocoByIdAsync(int blocoId)
+        public async Task<Bloco?> GetBlocoByIdAsync(int blocoId, int universidadeId)
         {
-            return await _context.Blocos.FirstOrDefaultAsync(b => b.Id == blocoId);
+            return await _context.Blocos.Include(b => b.Salas).FirstOrDefaultAsync(b => b.Id == blocoId && b.UniversidadeId == universidadeId);
         }
 
         public async Task<IEnumerable<Bloco>> GetBlocosWithSalasAsync()
@@ -57,9 +57,9 @@ namespace TrabalhoBancoDeDados.api.Repositories
             return await _context.Blocos.OrderBy(b => b.Id).Include(b => b.Salas).ToListAsync();
         }
 
-        public async Task<Sala?> GetSalaByIdAsync(int salaId)
+        public async Task<Sala?> GetSalaByIdAsync(int salaId, int blocoId)
         {
-            return await _context.Salas.FirstOrDefaultAsync(s => s.Id == salaId);
+            return await _context.Salas.FirstOrDefaultAsync(s => s.Id == salaId && s.BlocoId == blocoId);
         }
 
         public async Task<IEnumerable<Sala>> GetSalasAsync()
@@ -69,7 +69,10 @@ namespace TrabalhoBancoDeDados.api.Repositories
 
         public async Task<Universidade?> GetUniversidadeByIdAsync(int universidadeId)
         {
-            return await _context.Universidades.FirstOrDefaultAsync(u => u.Id == universidadeId);
+            return await _context.Universidades
+                .Include(u => u.Blocos)
+                .ThenInclude(b => b.Salas)
+                .FirstOrDefaultAsync(u => u.Id == universidadeId);
         }
 
         public async Task<IEnumerable<Universidade>> GetUniversidadesWithBlocosAsync()
